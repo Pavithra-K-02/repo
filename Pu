@@ -1,1 +1,85 @@
+      B2. Create and configure  Jenkins files for workflow and build of an application  and push the image
+Jenkinsfile:
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = 'Docker-credentials'//give your credential name
+        IMAGE_NAME = 'shilpakevala/new_docker_image'//give your image name
+    }
+
+    stages {
+
+        stage('Build Java Application') {
+            steps {
+                bat 'javac HelloWorld.java'
+            }
+        }
+
+        stage('Run Java Program') {
+            steps {
+                bat 'java HelloWorld'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t %IMAGE_NAME%:latest .'
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                credentialsId: 'Docker-credentials',//give your credentials mentioned above
+                usernameVariable: 'USER',
+                passwordVariable: 'PASS')]) {
+
+                    bat 'echo %PASS%| docker login -u %USER% --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                bat 'docker push %IMAGE_NAME%:latest'
+            }
+        }
+    }
+}
+
+
+C1. Create a maven projects with all dependencies required for the application in CI/CD pipeline.
+Java code:
+package maven.lab6;
+
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+public class demo {
+	public static void main(String[] args) throws IOException, ParseException {
+		JSONParser jsonparser = new JSONParser();
+		FileReader reader = new FileReader(".\\JSON\\demo1.json");
+		Object obj = jsonparser.parse(reader);
+		JSONObject empjsonobj = (JSONObject)obj;
+		
+		String fname = (String) empjsonobj.get("firstname");
+		String lname = (String) empjsonobj.get("lastname");
+		
+		System.out.println("first name:"+fname);
+		System.out.println("Last name:"+lname);
+		}
+	}
+JSON Code://create a folder JSON then a file demo1.json
+{
+"firstname" : "shilpa",
+"lastname" : "KS"
+}
+
+
+
 Theres a big elephant
